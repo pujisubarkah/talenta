@@ -49,16 +49,16 @@ const getTabLabel = (id: number) => {
           <span class="relative z-10">{{ tab.label }}</span>
           
           <!-- Penutup border bawah agar menyatu dengan body folder -->
-          <div v-if="activeTab === tab.id" class="absolute -bottom-[2px] left-0 right-0 h-[3px] bg-white"></div>
+          <div v-if="activeTab === tab.id" class="absolute -bottom-0.5 left-0 right-0 h-0.75 bg-white"></div>
         </button>
       </div>
 
       <!-- Folder Body / Tab Content -->
-      <div class="bg-white rounded-2xl rounded-tl-none border border-slate-200 shadow-md relative z-10 min-h-[400px]">
+      <div class="bg-white rounded-2xl rounded-tl-none border border-slate-200 shadow-md relative z-10 min-h-100">
         <div v-if="activeTab === 0" class="p-6">
           <TalentMatrix />
         </div>
-        <div v-else class="min-h-[400px]">
+        <div v-else class="min-h-100">
           <TalentListTable :tab-id="activeTab" :tab-label="getTabLabel(activeTab)" />
         </div>
       </div>

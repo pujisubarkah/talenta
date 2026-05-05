@@ -2,50 +2,53 @@
 definePageMeta({ layout: false })
 
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
 import { IconUser, IconLock, IconEye, IconEyeOff, IconAlertCircle } from '@tabler/icons-vue'
 
-const username = ref('')
+const pegNip = ref('')
 const password = ref('')
 const errorMessage = ref('')
 const showPassword = ref(false)
 const rememberMe = ref(false)
-const router = useRouter()
+const isSubmitting = ref(false)
+const authUser = useCookie<string | null>('auth_user')
 
-const handleLogin = async (e: Event) => {
-  e.preventDefault()
+const handleLogin = async () => {
+  if (isSubmitting.value) return
 
-  if (!username.value || !password.value) {
-    errorMessage.value = 'Username dan password harus diisi'
+  if (!pegNip.value || !password.value) {
+    errorMessage.value = 'NIP dan password harus diisi'
     return
   }
 
+  isSubmitting.value = true
+  errorMessage.value = ''
+
   try {
-    const response = await fetch('/api/login', {
+    const result = await $fetch<{
+      success: boolean
+      message: string
+      data: {
+        id: string
+        pegNip: string | null
+        pegNama: string | null
+        jabatanNama: string | null
+        roleId: number | null
+      }
+    }>('/api/login', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username: username.value, password: password.value }),
+      body: {
+        pegNip: pegNip.value,
+        password: password.value,
+      },
     })
 
-    const result = await response.json()
-
-    if (!response.ok) {
-      errorMessage.value = result.error || 'Terjadi kesalahan saat login'
-      return
-    }
-
-    const { user, session_id } = result
-    localStorage.setItem('user', JSON.stringify(user))
-    localStorage.setItem('session_id', session_id)
-
-    if (user.role_id === 1 || user.role_id === 4) {
-      router.push('/home')
-    } else {
-      errorMessage.value = 'Peran tidak dikenali'
-    }
+    authUser.value = JSON.stringify(result.data)
+    await navigateTo('/home')
   } catch (err) {
-    console.error('Error saat login:', err)
-    errorMessage.value = 'Terjadi kesalahan. Silakan coba lagi.'
+    const statusMessage = (err as { statusMessage?: string })?.statusMessage
+    errorMessage.value = statusMessage || 'NIP atau password salah'
+  } finally {
+    isSubmitting.value = false
   }
 }
 </script>
@@ -75,7 +78,7 @@ const handleLogin = async (e: Event) => {
         <h2 class="text-lg font-bold text-slate-700 mb-1">Selamat datang 👋</h2>
         <p class="text-sm text-slate-400 mb-6">Masuk ke akun Anda untuk melanjutkan</p>
 
-        <form @submit="handleLogin" class="space-y-4">
+        <form @submit.prevent="handleLogin" class="space-y-4">
           <!-- Error -->
           <div
             v-if="errorMessage"
@@ -85,20 +88,20 @@ const handleLogin = async (e: Event) => {
             {{ errorMessage }}
           </div>
 
-          <!-- Username -->
+          <!-- NIP -->
           <div>
-            <label for="username" class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wide">
-              Username
+            <label for="pegNip" class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wide">
+              NIP
             </label>
             <div class="flex rounded-xl border border-slate-200 bg-slate-50 overflow-hidden focus-within:ring-2 focus-within:ring-[#3781c7]/30 focus-within:border-[#3781c7] transition">
               <span class="flex items-center justify-center w-11 shrink-0 bg-slate-100 border-r border-slate-200">
                 <IconUser class="w-4 h-4 text-[#3781c7]" />
               </span>
               <input
-                id="username"
-                v-model="username"
+                id="pegNip"
+                v-model="pegNip"
                 type="text"
-                placeholder="Masukkan username"
+                placeholder="Masukkan NIP"
                 required
                 class="flex-1 px-3 py-2.5 bg-transparent text-slate-700 text-sm placeholder-slate-400 focus:outline-none"
               />
@@ -149,9 +152,10 @@ const handleLogin = async (e: Event) => {
           <!-- Submit -->
           <button
             type="submit"
+            :disabled="isSubmitting"
             class="w-full py-3 rounded-xl bg-linear-to-r from-[#3781c7] to-[#1a4f8a] hover:from-[#2d6ca1] hover:to-[#163f6e] text-white font-bold text-sm tracking-wide shadow-md hover:shadow-lg transition-all mt-2"
           >
-            Masuk
+            {{ isSubmitting ? 'Memproses...' : 'Masuk' }}
           </button>
         </form>
       </div>
