@@ -1,0 +1,30 @@
+{
+  "name": "stas",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@idds/vue": "^1.6.20",
+    "@tabler/icons-vue": "^3.41.1",
+    "@tailwindcss/vite": "^4.2.4",
+    "apexcharts": "^5.10.6",
+    "drizzle-orm": "^0.45.2",
+    "nuxt": "^4.4.4",
+    "pg": "^8.20.0",
+    "tailwindcss": "^4.2.4",
+    "vue": "^3.5.33",
+    "vue-router": "^5.0.6",
+    "vue3-apexcharts": "^1.11.1"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.20.0",
+    "@vue/language-core": "^3.2.8",
+    "drizzle-kit": "^0.31.10"
+  }
+}

@@ -1,0 +1,78 @@
+@import "tailwindcss";
+
+* {
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Custom utilities for catchy talent boxes */
+@layer utilities {
+  .gradient-high-performer {
+    background-image: linear-gradient(to bottom right, #facc15, #eab308, #fb923c);
+    color: #713f12; /* yellow-900 */
+  }
+  .gradient-high-potential {
+    background-image: linear-gradient(to bottom right, #60a5fa, #3b82f6, #6366f1);
+    color: #ffffff;
+  }
+  .gradient-star {
+    background-image: linear-gradient(to bottom right, #34d399, #10b981, #14b8a6);
+    color: #ffffff;
+  }
+  .gradient-solid-performer {
+    background-image: linear-gradient(to bottom right, #fdba74, #fb923c, #fbbf24);
+    color: #7c2d12; /* orange-900 */
+  }
+  .gradient-core-player {
+    background-image: linear-gradient(to bottom right, #bfdbfe, #93c5fd, #7dd3fc);
+    color: #1e3a8a; /* blue-900 */
+  }
+  .gradient-potential-gem {
+    background-image: linear-gradient(to bottom right, #a5f3fc, #67e8f9, #5eead4);
+    color: #164e63; /* cyan-900 */
+  }
+  .gradient-risk {
+    background-image: linear-gradient(to bottom right, #ef4444, #dc2626, #f43f5e);
+    color: #ffffff;
+  }
+  .gradient-average-performer {
+    background-image: linear-gradient(to bottom right, #fce7f3, #f9a8d4, #fda4af);
+    color: #831843; /* pink-900 */
+  }
+  .gradient-inconsistent {
+    background-image: linear-gradient(to bottom right, #e5e7eb, #d1d5db, #cbd5e1);
+    color: #374151; /* gray-700 */
+  }
+
+  .glassmorphism {
+    backdrop-filter: blur(4px);
+    background-color: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+  }
+
+  .glow-hover {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  }
+
+  .glow-active {
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(59, 130, 246, 0.5);
+  }
+
+  .badge-glow {
+    background-color: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(4px);
+    color: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  }
+
+  .count-glow {
+    background-image: linear-gradient(
+      to right,
+      rgba(0, 0, 0, 0),
+      rgba(255, 255, 255, 0.2),
+      rgba(0, 0, 0, 0)
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+}
