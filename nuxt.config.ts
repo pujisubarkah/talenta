@@ -4,6 +4,11 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
+  nitro: {
+    externals: {
+      external: ['pg', 'pg-pool', 'pg-protocol', 'pg-types', 'pgpass'],
+    },
+  },
   css: ['~/assets/css/main.css', '@idds/vue/index.css'],
   vite: {
     plugins: [

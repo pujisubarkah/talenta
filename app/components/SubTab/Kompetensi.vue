@@ -1,8 +1,12 @@
 <script setup lang="ts">
 import type { ApexOptions } from 'apexcharts'
-import { computed, defineAsyncComponent } from 'vue'
+import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue'
 
 const ApexChart = defineAsyncComponent(() => import('vue3-apexcharts'))
+
+const props = defineProps<{
+  pegNip?: string
+}>()
 
 type Indicator = {
   label: string
@@ -10,22 +14,64 @@ type Indicator = {
   color: string
 }
 
-const indicators: Indicator[] = [
-  { label: 'Integritas', value: 88, color: '#2563eb' },
-  { label: 'Komunikasi', value: 80, color: '#0f766e' },
-  { label: 'Orientasi pada Hasil', value: 85, color: '#d97706' },
-  { label: 'Kerjasama', value: 83, color: '#7c3aed' },
-  { label: 'Pelayanan Publik', value: 79, color: '#dc2626' },
-  { label: 'Pengembangan Diri dan Orang Lain', value: 82, color: '#0891b2' },
-  { label: 'Mengelola Perubahan', value: 76, color: '#16a34a' },
-  { label: 'Pengambilan Keputusan', value: 84, color: '#9333ea' },
-  { label: 'Perekat Bangsa', value: 87, color: '#e11d48' },
-]
+const indicators = ref<Indicator[]>([
+  { label: 'Integritas', value: 0, color: '#2563eb' },
+  { label: 'Komunikasi', value: 0, color: '#0f766e' },
+  { label: 'Orientasi pada Hasil', value: 0, color: '#d97706' },
+  { label: 'Kerjasama', value: 0, color: '#7c3aed' },
+  { label: 'Pelayanan Publik', value: 0, color: '#dc2626' },
+  { label: 'Pengembangan Diri dan Orang Lain', value: 0, color: '#0891b2' },
+  { label: 'Mengelola Perubahan', value: 0, color: '#16a34a' },
+  { label: 'Pengambilan Keputusan', value: 0, color: '#9333ea' },
+  { label: 'Perekat Bangsa', value: 0, color: '#e11d48' },
+])
+
+const toNumber = (value: string | number | null | undefined) => {
+  if (value === null || value === undefined) return 0
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : 0
+}
+
+const loadKompetensi = async () => {
+  if (!props.pegNip) return
+
+  const response = await $fetch<{
+    data: {
+      kompetensiIntegritas: string | null
+      kompetensiKomunikasi: string | null
+      kompetensiOrientasiHasil: string | null
+      kompetensiKerjasama: string | null
+      kompetensiPelayananPublik: string | null
+      kompetensiPengembanganDiriOrangLain: string | null
+      kompetensiMengelolaPerubahan: string | null
+      kompetensiPengambilanKeputusan: string | null
+      kompetensiPerekatBangsa: string | null
+    }
+  }>(`/api/pegawai/${props.pegNip}/kompetensi`)
+
+  const data = response?.data
+  if (!data) return
+
+  indicators.value = [
+    { label: 'Integritas', value: toNumber(data.kompetensiIntegritas), color: '#2563eb' },
+    { label: 'Komunikasi', value: toNumber(data.kompetensiKomunikasi), color: '#0f766e' },
+    { label: 'Orientasi pada Hasil', value: toNumber(data.kompetensiOrientasiHasil), color: '#d97706' },
+    { label: 'Kerjasama', value: toNumber(data.kompetensiKerjasama), color: '#7c3aed' },
+    { label: 'Pelayanan Publik', value: toNumber(data.kompetensiPelayananPublik), color: '#dc2626' },
+    { label: 'Pengembangan Diri dan Orang Lain', value: toNumber(data.kompetensiPengembanganDiriOrangLain), color: '#0891b2' },
+    { label: 'Mengelola Perubahan', value: toNumber(data.kompetensiMengelolaPerubahan), color: '#16a34a' },
+    { label: 'Pengambilan Keputusan', value: toNumber(data.kompetensiPengambilanKeputusan), color: '#9333ea' },
+    { label: 'Perekat Bangsa', value: toNumber(data.kompetensiPerekatBangsa), color: '#e11d48' },
+  ]
+}
+
+onMounted(loadKompetensi)
+watch(() => props.pegNip, loadKompetensi)
 
 const chartSeries = computed(() => [
   {
     name: 'Skor',
-    data: indicators.map((indicator) => indicator.value),
+    data: indicators.value.map((indicator) => indicator.value),
   },
 ])
 
@@ -44,10 +90,10 @@ const chartOptions = computed<ApexOptions>(() => ({
     },
   },
   xaxis: {
-    categories: indicators.map((indicator) => indicator.label),
+    categories: indicators.value.map((indicator) => indicator.label),
     labels: {
       style: {
-        colors: indicators.map(() => '#334155'),
+        colors: indicators.value.map(() => '#334155'),
         fontSize: '10.5px',
         fontWeight: '700',
         fontFamily: 'Poppins, sans-serif',
@@ -56,8 +102,8 @@ const chartOptions = computed<ApexOptions>(() => ({
   },
   yaxis: {
     min: 0,
-    max: 100,
-    tickAmount: 4,
+    max: 5,
+    tickAmount: 5,
     labels: { show: false },
   },
   colors: ['#0891b2'],
@@ -127,8 +173,8 @@ const chartOptions = computed<ApexOptions>(() => ({
 }))
 
 const averageScore = computed(() => {
-  const total = indicators.reduce((sum, indicator) => sum + indicator.value, 0)
-  return (total / indicators.length).toFixed(1)
+  const total = indicators.value.reduce((sum, indicator) => sum + indicator.value, 0)
+  return indicators.value.length ? (total / indicators.value.length).toFixed(1) : '0.0'
 })
 </script>
 

@@ -56,10 +56,10 @@ const getTabLabel = (id: number) => {
       <!-- Folder Body / Tab Content -->
       <div class="bg-white rounded-2xl rounded-tl-none border border-slate-200 shadow-md relative z-10 min-h-100">
         <div v-if="activeTab === 0" class="p-6">
-          <TalentMatrix />
+          <TalentMatrix @select-box="activeTab = $event" />
         </div>
         <div v-else class="min-h-100">
-          <TalentListTable :tab-id="activeTab" :tab-label="getTabLabel(activeTab)" />
+          <TalentListTable :key="activeTab" :tab-id="activeTab" :tab-label="getTabLabel(activeTab)" />
         </div>
       </div>
     </div>

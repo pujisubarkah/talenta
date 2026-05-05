@@ -19,16 +19,20 @@
     <div class="bg-white border border-slate-200 rounded-b-xl rounded-tr-xl p-4">
       <SubTabSpesifik v-if="activeTab === 'Spesifik'" />
       <SubTabGenerik v-else-if="activeTab === 'Generik (Partisipasi dalam organisasi)'" />
-      <SubTabPotensiTalenta v-else-if="activeTab === 'Potensi Talenta'" />
+      <SubTabPotensiTalenta v-else-if="activeTab === 'Potensi Talenta'" :peg-nip="pegNip" />
       <SubTabRekamJejak v-else-if="activeTab === 'Rekam Jejak Jabatan'" />
       <SubTabPertimbangan v-else-if="activeTab === 'Pertimbangan Lainnya'" />
-      <SubTabKompetensi v-else-if="activeTab === 'Kompetensi Talenta'" />
+      <SubTabKompetensi v-else-if="activeTab === 'Kompetensi Talenta'" :peg-nip="pegNip" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
+
+defineProps<{
+  pegNip?: string
+}>()
 
 const tabs = ['Spesifik', 'Generik (Partisipasi dalam organisasi)', 'Potensi Talenta', 'Rekam Jejak Jabatan', 'Pertimbangan Lainnya', 'Kompetensi Talenta']
 const activeTab = ref(tabs[0])

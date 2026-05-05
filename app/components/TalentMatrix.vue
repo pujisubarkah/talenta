@@ -1,17 +1,43 @@
 <script setup lang="ts">
-const boxes = [
-  { id: 4, title: 'Solid Performer',     count: 0,   color: 'bg-orange-200 text-orange-900' },
-  { id: 7, title: 'High Performer',      count: 38,  color: 'bg-yellow-300 text-yellow-900' },
-  { id: 9, title: 'Star',                count: 22,  color: 'bg-green-400 text-white' },
-  { id: 2, title: 'Inconsistent Player', count: 87,  color: 'bg-gray-200 text-gray-700' },
-  { id: 5, title: 'Core Player',         count: 124, color: 'bg-blue-200 text-blue-900' },
-  { id: 8, title: 'High Potential',      count: 56,  color: 'bg-blue-400 text-white' },
-  { id: 1, title: 'Risk',                count: 31,  color: 'bg-red-500 text-white' },
-  { id: 3, title: 'Average Performer',   count: 43,  color: 'bg-pink-200 text-pink-900' },
-  { id: 6, title: 'Potential Gem',       count: 14,  color: 'bg-cyan-200 text-cyan-900' },
-]
+import { computed, onMounted, ref } from 'vue'
 
-const totalCount = boxes.reduce((sum, b) => sum + b.count, 0)
+const emit = defineEmits<{
+  selectBox: [id: number]
+}>()
+
+const boxes = ref([
+  { id: 4, title: 'Solid Performer',     count: 0,   color: 'bg-orange-200 text-orange-900' },
+  { id: 7, title: 'High Performer',      count: 0,   color: 'bg-yellow-300 text-yellow-900' },
+  { id: 9, title: 'Star',                count: 0,   color: 'bg-green-400 text-white' },
+  { id: 2, title: 'Inconsistent Player', count: 0,   color: 'bg-gray-200 text-gray-700' },
+  { id: 5, title: 'Core Player',         count: 0,   color: 'bg-blue-200 text-blue-900' },
+  { id: 8, title: 'High Potential',      count: 0,   color: 'bg-blue-400 text-white' },
+  { id: 1, title: 'Risk',                count: 0,   color: 'bg-red-500 text-white' },
+  { id: 3, title: 'Average Performer',   count: 0,   color: 'bg-pink-200 text-pink-900' },
+  { id: 6, title: 'Potential Gem',       count: 0,   color: 'bg-cyan-200 text-cyan-900' },
+])
+
+const totalCount = computed(() => boxes.value.reduce((sum, b) => sum + b.count, 0))
+
+onMounted(async () => {
+  const res = await $fetch<{
+    meta: {
+      nineBoxTotals?: Record<string, number>
+    }
+  }>('/api/pegawai/nilai', {
+    query: {
+      page: 1,
+      limit: 1,
+    },
+  })
+
+  const totals = res.meta?.nineBoxTotals ?? {}
+
+  boxes.value = boxes.value.map((box) => ({
+    ...box,
+    count: Number(totals[String(box.id)] ?? 0),
+  }))
+})
 </script>
 
 <template>
@@ -51,6 +77,7 @@ const totalCount = boxes.reduce((sum, b) => sum + b.count, 0)
             :title="box.title"
             :count="box.count"
             :color="box.color"
+            @click="emit('selectBox', box.id)"
           />
         </div>
 

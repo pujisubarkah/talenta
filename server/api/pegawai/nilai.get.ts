@@ -12,33 +12,19 @@ export default defineEventHandler(async (event) => {
   const nineBox = query.nineBox ? Number(query.nineBox) : undefined
 
   const columns = {
-    pegNip:          pegawai.pegNip,
-    pegNama:         pegawai.pegNama,
-    jabatan:         pegawai.jabatan,
-    satuanKerjaNama: pegawai.satuanKerjaNama,
-    unitKerjaNama:   pegawai.unitKerjaNama,
-    eselonNm:        pegawai.eselonNm,
-    golAkhirNm:      pegawai.golAkhirNm,
-    golIdAkhir:      pegawai.golIdAkhir,
-    eselonId:        pegawai.eselonId,
-    jabatanId:       pegawai.jabatanId,
-    satuanKerjaId:   pegawai.satuanKerjaId,
-    unitKerjaId:     pegawai.unitKerjaId,
-    photoUrl:        pegawai.photoUrl,
-    jfuId:           pegawai.jfuId,
-    jfId:            pegawai.jfId,
-    nilaiKinerja:    pegawai.nilaiKinerja,
-    nilaiPotensi:    pegawai.nilaiPotensi,
-    nineBox:         pegawai.nineBox,
+    pegNip:       pegawai.pegNip,
+    pegNama:      pegawai.pegNama,
+    jabatan:      pegawai.jabatan,
+    nilaiKinerja: pegawai.nilaiKinerja,
+    nilaiPotensi: pegawai.nilaiPotensi,
+    nineBox:      pegawai.nineBox,
   }
 
   const searchClause = search
     ? or(
-        ilike(pegawai.pegNip,          `%${search}%`),
-        ilike(pegawai.pegNama,         `%${search}%`),
-        ilike(pegawai.jabatan,         `%${search}%`),
-        ilike(pegawai.satuanKerjaNama, `%${search}%`),
-        ilike(pegawai.unitKerjaNama,   `%${search}%`),
+        ilike(pegawai.pegNip,   `%${search}%`),
+        ilike(pegawai.pegNama,  `%${search}%`),
+        ilike(pegawai.jabatan,  `%${search}%`),
       )
     : undefined
 
@@ -48,12 +34,35 @@ export default defineEventHandler(async (event) => {
     ? and(searchClause, nineBoxClause)
     : searchClause ?? nineBoxClause
 
-  const [rows, countRows] = await Promise.all([
+  const [rows, totalRows, groupedRows] = await Promise.all([
     db.select(columns).from(pegawai).where(whereClause).limit(limit).offset(offset),
     db.select({ total: count() }).from(pegawai).where(whereClause),
+    db
+      .select({ nineBox: pegawai.nineBox, total: count() })
+      .from(pegawai)
+      .where(whereClause)
+      .groupBy(pegawai.nineBox),
   ])
 
-  const total = countRows[0]?.total ?? 0
+  const total = Number(totalRows[0]?.total ?? 0)
+  const nineBoxTotals: Record<string, number> = {
+    '1': 0,
+    '2': 0,
+    '3': 0,
+    '4': 0,
+    '5': 0,
+    '6': 0,
+    '7': 0,
+    '8': 0,
+    '9': 0,
+  }
+
+  for (const row of groupedRows) {
+    const key = String(row.nineBox ?? '')
+    if (key in nineBoxTotals) {
+      nineBoxTotals[key] = Number(row.total ?? 0)
+    }
+  }
 
   return {
     data: rows,
@@ -62,6 +71,7 @@ export default defineEventHandler(async (event) => {
       page,
       limit,
       totalPages: Math.ceil(total / limit),
+      nineBoxTotals,
     },
   }
 })

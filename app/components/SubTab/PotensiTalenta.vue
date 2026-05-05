@@ -1,8 +1,12 @@
 <script setup lang="ts">
 import type { ApexOptions } from 'apexcharts'
-import { computed, defineAsyncComponent } from 'vue'
+import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue'
 
 const ApexChart = defineAsyncComponent(() => import('vue3-apexcharts'))
+
+const props = defineProps<{
+  pegNip?: string
+}>()
 
 type Indicator = {
   label: string
@@ -10,21 +14,61 @@ type Indicator = {
   color: string
 }
 
-const indicators: Indicator[] = [
-  { label: 'Kemampuan Intelektual', value: 80, color: '#2563eb' },
-  { label: 'Kemampuan Interpersonal', value: 75, color: '#0f766e' },
-  { label: 'Kesadaran Diri', value: 85, color: '#7c3aed' },
-  { label: 'Kemampuan Berpikir Kritis', value: 78, color: '#d97706' },
-  { label: 'Kemampuan Menyelesaikan Masalah', value: 82, color: '#dc2626' },
-  { label: 'Kecerdasan Emosional', value: 88, color: '#0891b2' },
-  { label: 'Kemampuan Belajar Cepat dan Mengembangkan Diri', value: 90, color: '#16a34a' },
-  { label: 'Motivasi dan Komitmen', value: 87, color: '#9333ea' },
-]
+const indicators = ref<Indicator[]>([
+  { label: 'Kemampuan Intelektual', value: 0, color: '#2563eb' },
+  { label: 'Kemampuan Interpersonal', value: 0, color: '#0f766e' },
+  { label: 'Kemampuan Berpikir Kritis', value: 0, color: '#7c3aed' },
+  { label: 'Kemampuan Menyelesaikan Masalah', value: 0, color: '#d97706' },
+  { label: 'Kecerdasan Emosional', value: 0, color: '#dc2626' },
+  { label: 'Kemampuan Belajar Cepat', value: 0, color: '#0891b2' },
+  { label: 'Motivasi dan Komitmen', value: 0, color: '#16a34a' },
+  { label: 'Kemampuan Mengarahkan', value: 0, color: '#9333ea' },
+])
+
+const toNumber = (value: string | number | null | undefined) => {
+  if (value === null || value === undefined) return 0
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : 0
+}
+
+const loadPotensi = async () => {
+  if (!props.pegNip) return
+
+  const response = await $fetch<{
+    data: {
+      potensiKemampuanIntelektual: string | null
+      potensiKemampuanInterpersonal: string | null
+      potensiKemampuanBerpikirKritis: string | null
+      potensiMenyelesaikanPermasalahan: string | null
+      potensiKecerdasanEmosional: string | null
+      potensiKemampuanBelajarCepat: string | null
+      potensiMotivasiKomitmen: string | null
+      potensiKemampuanMengarahkan: string | null
+    }
+  }>(`/api/pegawai/${props.pegNip}/potensi`)
+
+  const data = response?.data
+  if (!data) return
+
+  indicators.value = [
+    { label: 'Kemampuan Intelektual', value: toNumber(data.potensiKemampuanIntelektual), color: '#2563eb' },
+    { label: 'Kemampuan Interpersonal', value: toNumber(data.potensiKemampuanInterpersonal), color: '#0f766e' },
+    { label: 'Kemampuan Berpikir Kritis', value: toNumber(data.potensiKemampuanBerpikirKritis), color: '#7c3aed' },
+    { label: 'Kemampuan Menyelesaikan Masalah', value: toNumber(data.potensiMenyelesaikanPermasalahan), color: '#d97706' },
+    { label: 'Kecerdasan Emosional', value: toNumber(data.potensiKecerdasanEmosional), color: '#dc2626' },
+    { label: 'Kemampuan Belajar Cepat', value: toNumber(data.potensiKemampuanBelajarCepat), color: '#0891b2' },
+    { label: 'Motivasi dan Komitmen', value: toNumber(data.potensiMotivasiKomitmen), color: '#16a34a' },
+    { label: 'Kemampuan Mengarahkan', value: toNumber(data.potensiKemampuanMengarahkan), color: '#9333ea' },
+  ]
+}
+
+onMounted(loadPotensi)
+watch(() => props.pegNip, loadPotensi)
 
 const chartSeries = computed(() => [
   {
     name: 'Skor',
-    data: indicators.map((indicator) => indicator.value),
+    data: indicators.value.map((indicator) => indicator.value),
   },
 ])
 
@@ -43,10 +87,10 @@ const chartOptions = computed((): ApexOptions => ({
     },
   },
   xaxis: {
-    categories: indicators.map((indicator) => indicator.label),
+    categories: indicators.value.map((indicator) => indicator.label),
     labels: {
       style: {
-        colors: indicators.map(() => '#334155'),
+        colors: indicators.value.map(() => '#334155'),
         fontSize: '10.5px',
         fontWeight: 700,
         fontFamily: 'Poppins, sans-serif',
@@ -55,8 +99,8 @@ const chartOptions = computed((): ApexOptions => ({
   },
   yaxis: {
     min: 0,
-    max: 100,
-    tickAmount: 4,
+    max: 5,
+    tickAmount: 5,
     labels: { show: false },
   },
   colors: ['#7c3aed'],
@@ -126,8 +170,8 @@ const chartOptions = computed((): ApexOptions => ({
 }))
 
 const averageScore = computed(() => {
-  const total = indicators.reduce((sum, indicator) => sum + indicator.value, 0)
-  return (total / indicators.length).toFixed(1)
+  const total = indicators.value.reduce((sum, indicator) => sum + indicator.value, 0)
+  return indicators.value.length ? (total / indicators.value.length).toFixed(1) : '0.0'
 })
 </script>
 
