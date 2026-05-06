@@ -1,12 +1,10 @@
-# Task Progress: Fix Eyes Icon Visibility in Aksi Column
+# TODO: Clean up edit-kuesioner page
 
-## Steps to Complete (from approved plan):
-- [x] 1. Create TODO.md with breakdown of approved plan
-- [x] 2. Read TalentListTable.vue to confirm current content
-- [x] 3. Edit TalentListTable.vue: Update #cell-aksi slot for better visibility (darker color, hover effects, stroke-width)
-- [x] 4. Test changes (visual confirmation)
-- [x] 5. Update TODO.md with completion status
-- [ ] 6. Attempt task completion
-
-**Status**: Task completed - Eyes icon in Aksi column is now visible with improved styling (darker color, hover effects, stroke-width=2, disabled state for empty rows).
-
+## Steps:
+- [x] 1. Create TODO.md with plan breakdown
+- [x] 2. Read relevant API files (server/api/pegawai/[pegNip]/nilai.get.ts, etc.) - No detailed questionnaire API; use client-side
+- [x] 3. Define data structures and fetch initial data
+- [ ] 4. Refactor template to use generic ScoreRow components/sections
+- [ ] 5. Implement save functionality (create POST API if needed)
+- [ ] 6. Add validation, totals, responsive UI
+- [ ] 7. Test and attempt_completion

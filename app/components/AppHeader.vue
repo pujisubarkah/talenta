@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useCookie } from '#app'
 import {
   IconLogout,
   IconChevronDown,
@@ -12,8 +13,11 @@ const router = useRouter()
 const user = ref<{ name?: string, role_id?: number } | null>(null)
 
 const handleLogout = () => {
+  console.log('Logout diklik')
   localStorage.removeItem('user')
   localStorage.removeItem('session_id')
+  const authUser = useCookie('auth_user')
+  authUser.value = null
   router.push('/')
 }
 

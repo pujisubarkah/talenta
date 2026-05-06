@@ -49,7 +49,13 @@ const filteredRows = computed(() => {
 const formatTanggal = (iso: string) => {
   const [y, m, d] = iso.split('-')
   const bulan = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agt', 'Sep', 'Okt', 'Nov', 'Des']
-  return `${d} ${bulan[parseInt(m)]} ${y}`
+
+  if (!y || !m || !d) return iso
+
+  const monthIndex = Number.parseInt(m, 10)
+  const namaBulan = bulan[monthIndex] ?? ''
+
+  return `${d} ${namaBulan} ${y}`
 }
 
 const jenisBadgeClass = (jenis: string) => {
