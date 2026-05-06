@@ -2,7 +2,7 @@ import { compare } from 'bcryptjs'
 import { eq } from 'drizzle-orm'
 
 import { db } from '../../database'
-import { users } from '../../database/schema'
+import { users } from '../../database/schema/users'
 
 interface LoginBody {
   pegNip?: string

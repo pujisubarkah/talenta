@@ -116,7 +116,7 @@ const pages = computed(() => {
                 <div class="flex items-center gap-2">
                   <img
                     v-if="row.photoUrl"
-                    :src="`/foto/${row.photoUrl}`"
+                    :src="`https://dtjrketxxozstcwvotzh.supabase.co/storage/v1/object/public/foto_pegawai/${row.pegNip}.jpg`"
                     :alt="row.pegNama ?? ''"
                     class="w-7 h-7 rounded-full object-cover border border-slate-200 shrink-0"
                     @error="($event.target as HTMLImageElement).style.display = 'none'"
