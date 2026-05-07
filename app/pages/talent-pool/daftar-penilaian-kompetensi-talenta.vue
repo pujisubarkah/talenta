@@ -2,49 +2,54 @@
 import { ref } from 'vue'
 import { IconPlus, IconEdit, IconTrash } from '@tabler/icons-vue'
 
-type KompetensiItem = { id: number, nama: string, bobot: number }
-const kompetensiList = ref<KompetensiItem[]>([
-  { id: 1, nama: 'Kompetensi Teknis', bobot: 50 },
-  { id: 2, nama: 'Kompetensi Manajerial', bobot: 50 },
-])
-
-const newNama = ref('')
+type KompetensiItem = { id: number, key: string, label: string, bobot: number }
+const kompetensiList = ref<KompetensiItem[]>([])
+const newLabel = ref('')
 const newBobot = ref(0)
 const showModal = ref(false)
 const showEditModal = ref(false)
 const editId = ref<number|null>(null)
-const editNama = ref('')
+const editLabel = ref('')
 const editBobot = ref(0)
 
-function addKompetensi() {
-  if (!newNama.value || newBobot.value < 0 || newBobot.value > 100) return
-  kompetensiList.value.push({
-    id: Date.now(),
-    nama: newNama.value,
-    bobot: newBobot.value,
+async function fetchKompetensi() {
+  const res = await fetch('/api/master/penilaian-talenta')
+  const json = await res.json()
+  kompetensiList.value = Array.isArray(json.data) ? json.data : []
+}
+
+fetchKompetensi()
+
+async function addKompetensi() {
+  if (!newLabel.value || newBobot.value < 0 || newBobot.value > 100) return
+  await fetch('/api/master/penilaian-talenta', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ key: newLabel.value.toLowerCase().replace(/\s+/g, '_'), label: newLabel.value, bobot: newBobot.value })
   })
-  newNama.value = ''
+  newLabel.value = ''
   newBobot.value = 0
   showModal.value = false
+  await fetchKompetensi()
 }
 
 function startEdit(item: KompetensiItem) {
   editId.value = item.id
-  editNama.value = item.nama
-  editBobot.value = item.bobot
+  editLabel.value = item.label
+  editBobot.value = Number(item.bobot)
   showEditModal.value = true
 }
 
-function saveEdit() {
+async function saveEdit() {
   if (editId.value === null) return
-  const idx = kompetensiList.value.findIndex(i => i.id === editId.value)
-  if (idx === -1) return
-  const item = kompetensiList.value[idx]
-  if (!item) return
-  item.nama = editNama.value.trim()
-  item.bobot = editBobot.value
+  await fetch('/api/master/penilaian-talenta', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: editId.value, key: editLabel.value.toLowerCase().replace(/\s+/g, '_'), label: editLabel.value, bobot: editBobot.value })
+  })
   showEditModal.value = false
   editId.value = null
+  await fetchKompetensi()
 }
 
 function cancelEdit() {
@@ -52,8 +57,13 @@ function cancelEdit() {
   editId.value = null
 }
 
-function removeKompetensi(id:number) {
-  kompetensiList.value = kompetensiList.value.filter(i => i.id !== id)
+async function removeKompetensi(id:number) {
+  await fetch('/api/master/penilaian-talenta', {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id })
+  })
+  await fetchKompetensi()
 }
 </script>
 
@@ -71,14 +81,14 @@ function removeKompetensi(id:number) {
         <tr>
           <th class="px-4 py-3 text-center font-semibold w-12">No</th>
           <th class="px-4 py-3 text-left font-semibold">Kompetensi</th>
-          <th class="px-4 py-3 text-center font-semibold">Bobot (%)</th>
+          <th class="px-4 py-3 text-center font-semibold">Bobot</th>
           <th class="px-4 py-3 text-center font-semibold">Aksi</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-slate-100 bg-white text-slate-700">
         <tr v-for="(item, idx) in kompetensiList" :key="item.id">
           <td class="px-4 py-3 text-center">{{ idx + 1 }}</td>
-          <td class="px-4 py-3">{{ item.nama }}</td>
+          <td class="px-4 py-3">{{ item.label }}</td>
           <td class="px-4 py-3 text-center">{{ item.bobot }}</td>
           <td class="px-4 py-3 text-center">
             <div class="inline-flex gap-2">
@@ -104,7 +114,7 @@ function removeKompetensi(id:number) {
         <form @submit.prevent="saveEdit" class="space-y-4">
           <div>
             <label class="block text-sm font-medium mb-1">Nama Kompetensi</label>
-            <input v-model="editNama" placeholder="Nama kompetensi" class="border rounded px-2 py-1 text-sm w-full" required />
+            <input v-model="editLabel" placeholder="Nama kompetensi" class="border rounded px-2 py-1 text-sm w-full" required />
           </div>
           <div>
             <label class="block text-sm font-medium mb-1">Bobot (%)</label>
@@ -126,7 +136,7 @@ function removeKompetensi(id:number) {
         <form @submit.prevent="addKompetensi" class="space-y-4">
           <div>
             <label class="block text-sm font-medium mb-1">Nama Kompetensi</label>
-            <input v-model="newNama" placeholder="Nama kompetensi" class="border rounded px-2 py-1 text-sm w-full" required />
+            <input v-model="newLabel" placeholder="Nama kompetensi" class="border rounded px-2 py-1 text-sm w-full" required />
           </div>
           <div>
             <label class="block text-sm font-medium mb-1">Bobot (%)</label>

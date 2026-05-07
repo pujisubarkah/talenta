@@ -1,26 +1,79 @@
 <script setup lang="ts">
-import { FormKit, defaultConfig } from '@formkit/vue'
-import { provide } from 'vue'
+import { ref, computed, reactive } from 'vue'
 import { useRoute } from 'vue-router'
-provide('formkit-config', defaultConfig)
 const route = useRoute()
 const pegNip = String(route.params.pegNip || '')
 const slug = String(route.params.slug || '')
 
-const capaianKinerja = reactive({ nilai: '', bobot: '', penjumlahan: '' })
-const perilakuKerja = reactive({ nilai: '', bobot: '', penjumlahan: '' })
 
-const inovasi = reactive({ nilai: '', bobot: '', penjumlahan: '' })
-const disiplin = reactive({ nilai: '', bobot: '', penjumlahan: '' })
-const partisipasi = reactive({ nilai: '', bobot: '', penjumlahan: '' })
-const tugasTambahan = reactive({ nilai: '', bobot: '', penjumlahan: '' })
+import { onMounted } from 'vue'
+const spesifikList = ref<Array<{ id: string, nama: string, bobot: string, nilai: string, penjumlahan: string }>>([])
+const spesifikLoading = ref(false)
+const spesifikError = ref('')
 
-const generikItems = [
-  { key: 'inovasi', label: 'Inovasi', data: inovasi },
-  { key: 'disiplin', label: 'Disiplin', data: disiplin },
-  { key: 'partisipasi', label: 'Partisipasi', data: partisipasi },
-  { key: 'tugasTambahan', label: 'Tugas Tambahan', data: tugasTambahan },
-]
+onMounted(async () => {
+  spesifikLoading.value = true
+  spesifikError.value = ''
+  try {
+    const res = await fetch('/api/master/penilaian-spesifik')
+    const json = await res.json()
+    spesifikList.value = (json.data || []).map((item: any) => ({
+      id: item.id,
+      nama: item.nama,
+      bobot: item.bobot,
+      nilai: '',
+      penjumlahan: ''
+    }))
+  } catch (e) {
+    spesifikError.value = 'Gagal memuat data penilaian spesifik.'
+  } finally {
+    spesifikLoading.value = false
+  }
+})
+
+const generikList = ref<Array<{ id: string, nama: string, bobot: string, nilai: string, penjumlahan: string }>>([])
+const generikLoading = ref(false)
+const generikError = ref('')
+
+onMounted(async () => {
+  // ...existing spesifik fetch...
+  spesifikLoading.value = true
+  spesifikError.value = ''
+  try {
+    const res = await fetch('/api/master/penilaian-spesifik')
+    const json = await res.json()
+    spesifikList.value = (json.data || []).map((item: any) => ({
+      id: item.id,
+      nama: item.nama,
+      bobot: item.bobot,
+      nilai: '',
+      penjumlahan: ''
+    }))
+  } catch (e) {
+    spesifikError.value = 'Gagal memuat data penilaian spesifik.'
+  } finally {
+    spesifikLoading.value = false
+  }
+
+  // Penilaian Generik
+  generikLoading.value = true
+  generikError.value = ''
+  try {
+    const res = await fetch('/api/master/penilaian-generik')
+    const json = await res.json()
+    generikList.value = (json.data || []).map((item: any) => ({
+      id: item.id,
+      nama: item.nama,
+      bobot: item.bobot,
+      nilai: '',
+      penjumlahan: ''
+    }))
+  } catch (e) {
+    generikError.value = 'Gagal memuat data penilaian generik.'
+  } finally {
+    generikLoading.value = false
+  }
+})
 
 const kemampuanIntelektual = reactive({ nilai: '', bobot: '', penjumlahan: '' })
 const kemampuanInterpersonal = reactive({ nilai: '', bobot: '', penjumlahan: '' })
@@ -309,69 +362,44 @@ const kompetensiItems = [
       </div>
 
       <div class="p-6 space-y-6">
-        <FormKit type="group" #default>
-          <div class="grid grid-cols-4 gap-4 items-center">
-            <div>
-              <span class="text-sm font-semibold text-slate-700">Capaian Kinerja</span>
+        <div v-if="spesifikLoading" class="text-sm text-slate-500">Memuat data penilaian spesifik...</div>
+        <div v-else-if="spesifikError" class="text-sm text-red-500">{{ spesifikError }}</div>
+        <template v-else>
+          <div>
+            <div v-for="item in spesifikList" :key="item.id" class="grid grid-cols-4 gap-4 items-center">
+              <div>
+                <span class="text-sm font-semibold text-slate-700">{{ item.nama }}</span>
+              </div>
+              <div>
+                <input
+                  v-model="item.nilai"
+                  type="number"
+                  placeholder="Nilai"
+                  class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 text-center focus:border-[#3781c7] focus:outline-none"
+                  @input="item.penjumlahan = (!isNaN(parseFloat(item.nilai)) && !isNaN(parseFloat(item.bobot))) ? ((parseFloat(item.nilai) / 100) * parseFloat(item.bobot)).toFixed(2) : ''"
+                />
+              </div>
+              <div>
+                <input
+                  v-model="item.bobot"
+                  type="number"
+                  placeholder="Bobot"
+                  class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 text-center focus:border-[#3781c7] focus:outline-none"
+                  disabled
+                />
+              </div>
+              <div>
+                <input
+                  :value="item.penjumlahan"
+                  type="text"
+                  readonly
+                  placeholder="Penjumlahan"
+                  class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 text-center cursor-default"
+                />
+              </div>
             </div>
-            <FormKit
-              type="number"
-              v-model="capaianKinerja.nilai"
-              label="Nilai"
-              placeholder="Nilai"
-              input-class="w-full text-center"
-              @input="hitungPenjumlahanSpesifik(capaianKinerja)"
-            />
-            <FormKit
-              type="number"
-              v-model="capaianKinerja.bobot"
-              label="Bobot"
-              placeholder="Bobot"
-              input-class="w-full text-center"
-              @input="hitungPenjumlahanSpesifik(capaianKinerja)"
-            />
-            <FormKit
-              type="text"
-              :value="capaianKinerja.penjumlahan"
-              label="Penjumlahan"
-              placeholder="Penjumlahan"
-              input-class="w-full text-center bg-slate-50"
-              disabled
-            />
           </div>
-        </FormKit>
-
-        <FormKit type="group" #default>
-          <div class="grid grid-cols-4 gap-4 items-center">
-            <div>
-              <span class="text-sm font-semibold text-slate-700">Perilaku Kerja</span>
-            </div>
-            <FormKit
-              type="number"
-              v-model="perilakuKerja.nilai"
-              label="Nilai"
-              placeholder="Nilai"
-              input-class="w-full text-center"
-              @input="hitungPenjumlahanSpesifik(perilakuKerja)"
-            />
-            <FormKit
-              type="number"
-              v-model="perilakuKerja.bobot"
-              label="Bobot"
-              placeholder="Bobot"
-              input-class="w-full text-center"
-              @input="hitungPenjumlahanSpesifik(perilakuKerja)"
-            />
-            <FormKit
-              type="text"
-              :value="perilakuKerja.penjumlahan"
-              label="Penjumlahan"
-              placeholder="Penjumlahan"
-              input-class="w-full text-center bg-slate-50"
-              disabled
-            />
-          </div>
-        </FormKit>
+        </template>
       </div>
     </div>
 
@@ -379,40 +407,43 @@ const kompetensiItems = [
       <div class="bg-linear-to-r from-blue-900 to-blue-700 px-6 py-3">
         <h2 class="text-white font-semibold text-sm tracking-wide">Penilaian Generik</h2>
       </div>
-
       <div class="p-6 space-y-6">
-        <div v-for="item in generikItems" :key="item.key" class="grid grid-cols-4 gap-4 items-center">
-          <div>
-            <span class="text-sm font-semibold text-slate-700">{{ item.label }}</span>
+        <div v-if="generikLoading" class="text-sm text-slate-500">Memuat data penilaian generik...</div>
+        <div v-else-if="generikError" class="text-sm text-red-500">{{ generikError }}</div>
+        <template v-else>
+          <div v-for="item in generikList" :key="item.id" class="grid grid-cols-4 gap-4 items-center">
+            <div>
+              <span class="text-sm font-semibold text-slate-700">{{ item.nama }}</span>
+            </div>
+            <div>
+              <input
+                v-model="item.nilai"
+                type="number"
+                placeholder="Nilai"
+                class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 text-center focus:border-[#3781c7] focus:outline-none"
+                @input="item.penjumlahan = (!isNaN(parseFloat(item.nilai)) && !isNaN(parseFloat(item.bobot))) ? ((parseFloat(item.nilai) / 100) * parseFloat(item.bobot)).toFixed(2) : ''"
+              />
+            </div>
+            <div>
+              <input
+                v-model="item.bobot"
+                type="number"
+                placeholder="Bobot"
+                class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 text-center focus:border-[#3781c7] focus:outline-none"
+                disabled
+              />
+            </div>
+            <div>
+              <input
+                :value="item.penjumlahan"
+                type="text"
+                readonly
+                placeholder="Penjumlahan"
+                class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 text-center cursor-default"
+              />
+            </div>
           </div>
-          <div>
-            <input
-              v-model="item.data.nilai"
-              type="number"
-              placeholder="Nilai"
-              class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 text-center focus:border-[#3781c7] focus:outline-none"
-              @input="hitungPenjumlahanSpesifik(item.data)"
-            />
-          </div>
-          <div>
-            <input
-              v-model="item.data.bobot"
-              type="number"
-              placeholder="Bobot"
-              class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 text-center focus:border-[#3781c7] focus:outline-none"
-              @input="hitungPenjumlahanSpesifik(item.data)"
-            />
-          </div>
-          <div>
-            <input
-              :value="item.data.penjumlahan"
-              type="text"
-              readonly
-              placeholder="Penjumlahan"
-              class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 text-center cursor-default"
-            />
-          </div>
-        </div>
+        </template>
       </div>
     </div>
 

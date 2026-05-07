@@ -10,6 +10,7 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@formkit/vue": "^2.0.0",
     "@idds/vue": "^1.6.20",
     "@tabler/icons-vue": "^3.41.1",
     "@tailwindcss/vite": "^4.2.4",
