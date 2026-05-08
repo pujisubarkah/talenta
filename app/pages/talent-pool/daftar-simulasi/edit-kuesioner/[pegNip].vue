@@ -384,7 +384,7 @@ const kompetensiItems = [
                   v-model="item.bobot"
                   type="number"
                   placeholder="Bobot"
-                  class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 text-center focus:border-[#3781c7] focus:outline-none"
+                  class="w-full rounded-lg border border-slate-200 bg-slate-200 px-3 py-2 text-sm text-slate-700 text-center cursor-not-allowed"
                   disabled
                 />
               </div>
@@ -429,7 +429,7 @@ const kompetensiItems = [
                 v-model="item.bobot"
                 type="number"
                 placeholder="Bobot"
-                class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 text-center focus:border-[#3781c7] focus:outline-none"
+                class="w-full rounded-lg border border-slate-200 bg-slate-200 px-3 py-2 text-sm text-slate-700 text-center cursor-not-allowed"
                 disabled
               />
             </div>

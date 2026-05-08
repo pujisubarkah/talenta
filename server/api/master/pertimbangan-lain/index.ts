@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm'
 import { db } from '../../../database'
-import { masterPertimbanganLain } from '../../database/schema/master_pertimbangan_lain'
+import { masterPertimbanganLain } from '../../../database/schema/master_pertimbangan_lain'
 
 export default defineEventHandler(async (event) => {
   const method = event.method

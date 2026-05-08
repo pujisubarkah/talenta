@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm'
 import { db } from '../../../database'
-import { masterKompetensiItems } from '../../database/schema/master_kompetensi_items'
+import { masterKompetensiItems } from '../../../database/schema/master_kompetensi_items'
 
 type KompetensiBody = {
   key?: string
