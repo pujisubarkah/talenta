@@ -1,0 +1,11 @@
+/* Table custom style for blue header and striped rows */
+.ina-table thead tr th {
+  background-color: #1e3a8a; /* Tailwind bg-blue-900 */
+  color: #fff;
+}
+.ina-table tbody tr:nth-child(odd) {
+  background-color: #fff;
+}
+.ina-table tbody tr:nth-child(even) {
+  background-color: #e0e7ff; /* Tailwind bg-blue-100 */
+}

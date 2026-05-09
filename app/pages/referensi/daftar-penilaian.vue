@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { IconPlus, IconEdit, IconTrash } from '@tabler/icons-vue'
+import UIButton from '~/components/UI/UIButton.vue'
+import UIIcon from '~/components/UI/UIIcon.vue'
 
 type KategoriPenilaian = {
 	id: number
@@ -84,21 +86,67 @@ async function removeKategori(id: number) {
 	})
 	await fetchKategori()
 }
+
+const searchQuery = ref('')
+const filterStatus = ref<string>('')
+const pageSize = ref(10)
+const page = ref(1)
+
+watch([searchQuery, filterStatus], () => {
+	page.value = 1
+})
+
+const filteredKategoriList = computed(() => {
+	let result = kategoriList.value
+	if (searchQuery.value) {
+		const q = searchQuery.value.toLowerCase()
+		result = result.filter(k => k.nama_kategori.toLowerCase().includes(q) || k.kode.toLowerCase().includes(q))
+	}
+	if (filterStatus.value !== '') {
+		const isActive = filterStatus.value === 'true'
+		result = result.filter(k => k.is_active === isActive)
+	}
+	return result
+})
+
+const totalPages = computed(() => Math.max(1, Math.ceil(filteredKategoriList.value.length / pageSize.value)))
+const pagedKategoriList = computed(() => {
+	const start = (page.value - 1) * pageSize.value
+	return filteredKategoriList.value.slice(start, start + pageSize.value)
+})
 </script>
 
 <template>
 	<div class="p-6 w-full">
 		<h1 class="text-2xl font-bold mb-4">Daftar Kategori Penilaian</h1>
 
-		<!-- Button -->
-		<div class="flex justify-end mb-4">
-			<button
-				@click="showModal = true"
-				class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 flex items-center gap-2"
-			>
-				<IconPlus class="w-4 h-4" />
+		<!-- Action Bar (Filter & Button) -->
+		<div class="flex justify-between items-center mb-4">
+			<!-- Filter Section -->
+			<div class="flex items-center gap-3">
+				<input 
+					v-model="searchQuery"
+					type="text"
+					placeholder="Cari kode atau kategori..."
+					class="border border-slate-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-200 outline-none transition bg-white min-w-62.5"
+				/>
+				<select
+					v-model="filterStatus"
+					class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200 outline-none transition bg-white min-w-37.5"
+				>
+					<option value="">Semua Status</option>
+					<option value="true">Aktif</option>
+					<option value="false">Tidak Aktif</option>
+				</select>
+			</div>
+
+			<!-- Button Tambah -->
+			<UIButton color="primary" @click="showModal = true">
+				<UIIcon color="white" class="mr-2">
+					<IconPlus />
+				</UIIcon>
 				Tambah Kategori
-			</button>
+			</UIButton>
 		</div>
 
 		<!-- TABLE WRAPPER -->
@@ -121,11 +169,11 @@ async function removeKategori(id: number) {
 				<!-- BODY -->
 				<tbody class="divide-y divide-slate-100 text-slate-700">
 					<tr
-						v-for="(item, idx) in kategoriList"
+						v-for="(item, idx) in pagedKategoriList"
 						:key="item.id"
 						class="hover:bg-slate-50 transition"
 					>
-						<td class="px-3 py-3 text-center">{{ idx + 1 }}</td>
+						<td class="px-3 py-3 text-center">{{ (page - 1) * pageSize + idx + 1 }}</td>
 						<td class="px-3 py-3 font-medium">{{ item.kode }}</td>
 						<td class="px-3 py-3">{{ item.nama_kategori }}</td>
 						<td
@@ -142,32 +190,33 @@ async function removeKategori(id: number) {
 						</td>
 						<td class="px-3 py-3 text-center">
 							<div class="flex justify-center gap-2">
-								<button
-									@click="startEdit(item)"
-									class="px-3 py-1 rounded-lg bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 flex items-center gap-1 text-xs"
-								>
-									<IconEdit class="w-4 h-4" />
+								<UIButton color="secondary" size="sm" @click="startEdit(item)">
+									<UIIcon color="primary" size="sm"><IconEdit /></UIIcon>
 									Edit
-								</button>
-								<button
-									@click="removeKategori(item.id)"
-									class="px-3 py-1 rounded-lg bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 flex items-center gap-1 text-xs"
-								>
-									<IconTrash class="w-4 h-4" />
+								</UIButton>
+								<UIButton color="danger" size="sm" @click="removeKategori(item.id)">
+									<UIIcon color="danger" size="sm"><IconTrash /></UIIcon>
 									Hapus
-								</button>
+								</UIButton>
 							</div>
 						</td>
 					</tr>
 
 					<!-- EMPTY -->
-					<tr v-if="kategoriList.length === 0">
+					<tr v-if="filteredKategoriList.length === 0">
 						<td colspan="7" class="text-center py-10 text-slate-400">
 							Belum ada data kategori penilaian
 						</td>
 					</tr>
 				</tbody>
 			</table>
+		</div>
+
+		<!-- PAGINATION -->
+		<div v-if="filteredKategoriList.length > pageSize" class="flex justify-center mt-4">
+			<button class="px-3 py-1 mx-1 rounded border text-sm" :class="{ 'bg-blue-600 text-white border-blue-600': page === 1 }" :disabled="page === 1" @click="page--">&laquo;</button>
+			<button v-for="p in totalPages" :key="p" class="px-3 py-1 mx-1 rounded border text-sm" :class="{ 'bg-blue-600 text-white border-blue-600': page === p }" @click="page = p">{{ p }}</button>
+			<button class="px-3 py-1 mx-1 rounded border text-sm" :class="{ 'bg-blue-600 text-white border-blue-600': page === totalPages }" :disabled="page === totalPages" @click="page++">&raquo;</button>
 		</div>
 	</div>
 
@@ -305,3 +354,16 @@ async function removeKategori(id: number) {
 		</div>
 	</div>
 </template>
+
+<style scoped>
+table thead tr th {
+  background-color: #1e3a8a; /* Tailwind bg-blue-900 */
+  color: #fff;
+}
+table tbody tr:nth-child(odd) {
+  background-color: #fff;
+}
+table tbody tr:nth-child(even) {
+  background-color: #e0e7ff; /* Tailwind bg-blue-100 */
+}
+</style>
