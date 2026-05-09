@@ -1,5 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+
+const props = defineProps({
+  mini: { type: Boolean, default: false }
+})
 import { useRoute } from 'vue-router'
 import {
   IconLayoutDashboard,
@@ -109,17 +113,23 @@ const toggleMenu = (label: string) => {
 </script>
 
 <template>
-  <aside class="w-64 bg-white border-r border-slate-200 flex flex-col h-full shrink-0 shadow-sm z-20">
+  <aside :class="[
+    props.mini ? 'w-20' : 'w-64',
+    'bg-blue-900 border-r border-blue-700 flex flex-col h-full shrink-0 shadow-sm z-20 transition-all duration-200'
+  ]">
     <!-- Brand -->
-    <div class="h-16 flex items-center px-6 border-b border-slate-200 shrink-0">
-      <div class="w-8 h-8 rounded-lg bg-linear-to-br from-[#3781c7] to-[#1a4f8a] flex items-center justify-center shadow mr-3">
+    <div class="h-16 flex items-center px-6 border-b border-blue-700 shrink-0">
+      <div class="w-8 h-8 rounded-lg bg-linear-to-br from-blue-700 to-blue-900 flex items-center justify-center shadow mr-3">
         <img src="/lanri.png" alt="STAS" class="w-5 h-5 object-contain" />
       </div>
-      <span class="font-extrabold text-slate-800 tracking-tight text-lg">STAS</span>
+      <span v-if="!props.mini" class="font-extrabold text-white tracking-tight text-lg">STAS</span>
     </div>
 
     <!-- Navigation -->
-    <nav class="flex-1 overflow-y-auto py-6 px-4 space-y-1.5">
+    <nav :class="[
+      'flex-1 overflow-y-auto space-y-1.5',
+      props.mini ? 'py-4 px-1' : 'py-6 px-4'
+    ]">
       <div
         v-for="menu in menus"
         :key="menu.label"
@@ -128,51 +138,58 @@ const toggleMenu = (label: string) => {
         <NuxtLink
           v-if="menu.href"
           :to="menu.href"
-          class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all group"
-          :class="isActive(menu.href)
-            ? 'bg-[#3781c7] text-white shadow-md shadow-[#3781c7]/20'
-            : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'"
+          class="flex items-center px-2 py-2.5 rounded-xl font-semibold transition-all group"
+          :class="[
+            props.mini ? 'justify-center' : 'gap-3 text-sm',
+            isActive(menu.href)
+              ? 'bg-[#3781c7] text-white shadow-md shadow-[#3781c7]/20'
+              : 'text-white hover:bg-blue-800 hover:text-blue-200'
+          ]"
         >
           <component
             :is="menu.icon"
             class="w-5 h-5 transition-colors"
-            :class="isActive(menu.href) ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'"
+            :class="isActive(menu.href) ? 'text-white' : 'text-blue-300 group-hover:text-blue-200'"
           />
-          {{ menu.label }}
+          <span v-if="!props.mini">{{ menu.label }}</span>
         </NuxtLink>
 
         <button
           v-else
           type="button"
-          class="w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all group"
-          :class="isMenuWithChildrenActive(menu)
-            ? 'bg-[#3781c7] text-white shadow-md shadow-[#3781c7]/20'
-            : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'"
+          class="w-full flex items-center justify-between px-2 py-2.5 rounded-xl font-semibold transition-all group"
+          :class="[
+            props.mini ? 'justify-center' : 'gap-3 text-sm',
+            isMenuWithChildrenActive(menu)
+              ? 'bg-[#3781c7] text-white shadow-md shadow-[#3781c7]/20'
+              : 'text-white hover:bg-blue-800 hover:text-blue-200'
+          ]"
           @click="toggleMenu(menu.label)"
         >
           <span class="flex items-center gap-3">
             <component
               :is="menu.icon"
               class="w-5 h-5 transition-colors"
-              :class="isMenuWithChildrenActive(menu) ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'"
+              :class="isMenuWithChildrenActive(menu) ? 'text-white' : 'text-blue-300 group-hover:text-blue-200'"
             />
-            {{ menu.label }}
+            <span v-if="!props.mini">{{ menu.label }}</span>
           </span>
           <IconChevronDown
+            v-if="!props.mini"
             class="w-4 h-4 transition-transform"
             :class="isMenuOpen(menu) ? 'rotate-180' : ''"
           />
         </button>
 
-        <div v-if="menu.children && isMenuOpen(menu)" class="ml-4 mt-1 space-y-1 border-l border-slate-200 pl-3">
+        <div v-if="menu.children && isMenuOpen(menu) && !props.mini" class="ml-4 mt-1 space-y-1 border-l border-blue-700 pl-3">
           <NuxtLink
             v-for="child in menu.children"
             :key="child.href"
             :to="child.href"
             class="block rounded-lg px-2.5 py-2 text-xs font-semibold transition-all"
             :class="route.path.startsWith(child.href)
-              ? 'bg-[#e9f3fc] text-[#1a4f8a]'
-              : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'"
+              ? 'bg-blue-800 text-blue-200'
+              : 'text-blue-100 hover:bg-blue-800 hover:text-blue-200'"
           >
             {{ child.label }}
           </NuxtLink>

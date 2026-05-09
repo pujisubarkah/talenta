@@ -113,7 +113,7 @@ async function removeKategori(id: number) {
 						<th class="px-3 py-3 text-left font-semibold w-[320px]">Deskripsi</th>
 						<th class="px-3 py-3 text-center font-semibold w-20">Urutan</th>
 						<th class="px-3 py-3 text-center font-semibold w-20">Aktif</th>
-						<th class="px-3 py-3 text-center font-semibold w-40">Created At</th>
+
 						<th class="px-3 py-3 text-center font-semibold w-40">Aksi</th>
 					</tr>
 				</thead>
@@ -141,9 +141,6 @@ async function removeKategori(id: number) {
 							</span>
 						</td>
 						<td class="px-3 py-3 text-center">
-							{{ item.created_at ? new Date(item.created_at).toLocaleString() : '-' }}
-						</td>
-						<td class="px-3 py-3 text-center">
 							<div class="flex justify-center gap-2">
 								<button
 									@click="startEdit(item)"
@@ -165,7 +162,7 @@ async function removeKategori(id: number) {
 
 					<!-- EMPTY -->
 					<tr v-if="kategoriList.length === 0">
-						<td colspan="8" class="text-center py-10 text-slate-400">
+						<td colspan="7" class="text-center py-10 text-slate-400">
 							Belum ada data kategori penilaian
 						</td>
 					</tr>
