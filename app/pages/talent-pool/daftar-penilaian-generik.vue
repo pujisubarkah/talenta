@@ -6,10 +6,11 @@ import { IconPlus, IconEdit, IconTrash } from '@tabler/icons-vue'
 
 type GenerikItem = {
 	id: number
-	nama: string
+	kode: string
+	nama_penilaian: string
 	bobot: string
-	createdAt?: string
-	updatedAt?: string
+	jenis_nilai: string
+	sumber_nilai: string
 }
 const generikList = ref<GenerikItem[]>([])
 
@@ -46,7 +47,7 @@ async function addGenerik() {
 
 function startEdit(item: GenerikItem) {
 	editId.value = item.id
-	editNama.value = item.nama
+	editNama.value = item.nama_penilaian
 	editBobot.value = Number(item.bobot)
 	showEditModal.value = true
 }
@@ -83,41 +84,43 @@ async function removeGenerik(id: number) {
 <template>
 	<div class="p-6 max-w-2xl mx-auto">
 		<h1 class="text-xl font-bold mb-4">Daftar Penilaian Generik & Bobot</h1>
-		<div class="flex justify-end mb-2">
-			<button @click="showModal = true" class="px-4 py-2 rounded bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 flex items-center gap-2">
-			  <IconPlus class="w-4 h-4" />
-			  Tambah Penilaian
-			</button>
+		<div class="rounded-xl border border-slate-200 bg-white shadow-sm">
+			<table class="w-full table-fixed divide-y divide-slate-200 text-sm">
+				<thead class="bg-blue-900 text-white">
+					<tr>
+						<th class="px-3 py-3 text-center font-semibold w-12">No</th>
+						<th class="px-3 py-3 text-left font-semibold w-28">Kode</th>
+						<th class="px-3 py-3 text-left font-semibold w-44">Nama Penilaian</th>
+						<th class="px-3 py-3 text-center font-semibold w-20">Bobot</th>
+						<th class="px-3 py-3 text-center font-semibold w-32">Jenis Nilai</th>
+						<th class="px-3 py-3 text-center font-semibold w-32">Sumber Nilai</th>
+					</tr>
+				</thead>
+				<tbody class="text-slate-700">
+					<tr
+						v-for="(item, idx) in generikList"
+						:key="item.id"
+						:class="[
+							'transition',
+							idx % 2 === 0 ? 'bg-white' : 'bg-blue-50',
+							'hover:bg-slate-100'
+						]"
+					>
+						<td class="px-3 py-3 text-center">{{ idx + 1 }}</td>
+						<td class="px-3 py-3 font-medium">{{ item.kode }}</td>
+						<td class="px-3 py-3">{{ item.nama_penilaian }}</td>
+						<td class="px-3 py-3 text-center">{{ item.bobot }}</td>
+						<td class="px-3 py-3 text-center">{{ item.jenis_nilai }}</td>
+						<td class="px-3 py-3 text-center">{{ item.sumber_nilai }}</td>
+					</tr>
+					<tr v-if="generikList.length === 0">
+						<td colspan="6" class="text-center py-10 text-slate-400">
+							Belum ada data penilaian generik
+						</td>
+					</tr>
+				</tbody>
+			</table>
 		</div>
-		<table class="min-w-full divide-y divide-slate-200 text-sm mb-4">
-			<thead class="bg-slate-50 text-slate-600">
-				<tr>
-					<th class="px-4 py-3 text-center font-semibold w-12">No</th>
-					<th class="px-4 py-3 text-left font-semibold">Penilaian</th>
-					<th class="px-4 py-3 text-center font-semibold">Bobot (%)</th>
-					<th class="px-4 py-3 text-center font-semibold">Aksi</th>
-				</tr>
-			</thead>
-			<tbody class="divide-y divide-slate-100 bg-white text-slate-700">
-				<tr v-for="(item, idx) in generikList" :key="item.id">
-					<td class="px-4 py-3 text-center">{{ idx + 1 }}</td>
-					<td class="px-4 py-3">{{ item.nama }}</td>
-					<td class="px-4 py-3 text-center">{{ item.bobot }}</td>
-					<td class="px-4 py-3 text-center">
-						<div class="inline-flex gap-2">
-							<button @click="startEdit(item)" class="px-2 py-1 text-xs rounded bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 flex items-center gap-1">
-							  <IconEdit class="w-4 h-4" />
-							  Edit
-							</button>
-							  <button @click="removeGenerik(item.id)" class="px-2 py-1 text-xs rounded bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 flex items-center gap-1">
-							  <IconTrash class="w-4 h-4" />
-							  Hapus
-							</button>
-						</div>
-					</td>
-				</tr>
-			</tbody>
-		</table>
 
 		<!-- Modal Edit Penilaian -->
 		<div v-if="showEditModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/30">

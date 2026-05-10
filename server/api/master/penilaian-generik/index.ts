@@ -1,60 +1,26 @@
-import { z } from 'zod'
 import { db } from '../../../database/index'
-import { master_penilaian_generik } from '../../../database/schema/master_penilaian_generik'
+import { kategoriPenilaian } from '../../../database/schema/kategori-penilaian'
+import { penilaian } from '../../../database/schema/penilaian'
 import { eq } from 'drizzle-orm'
 
-// GET: List all penilaian generik
+// GET: List all penilaian spesifik (kategori: Penilaian Spesifik)
 export default defineEventHandler(async (event) => {
-  if (event.method === 'GET') {
-    const data = await db.select().from(master_penilaian_generik)
-    return { data }
+  if (event.method !== 'GET') {
+    return sendError(event, createError({ statusCode: 405, statusMessage: 'Method Not Allowed' }))
   }
 
-  if (event.method === 'POST') {
-    const body = await readBody(event)
-    const schema = z.object({
-      nama: z.string(),
-      bobot: z.number(),
-    })
-    const parsed = schema.safeParse(body)
-    if (!parsed.success) {
-      return sendError(event, createError({ statusCode: 400, statusMessage: 'Invalid input' }))
-    }
-    const [inserted] = await db.insert(master_penilaian_generik).values({
-      nama: parsed.data.nama,
-      bobot: parsed.data.bobot.toString(),
-    }).returning()
-    return { data: inserted }
+  // Cari kategori "Penilaian Generik"
+  const kategori = await db.query.kategoriPenilaian.findFirst({
+    where: (k) => eq(k.nama_kategori, 'Penilaian Generik')
+  })
+  if (!kategori) {
+    return { data: [], kategori: null }
   }
 
-  if (event.method === 'PATCH') {
-    const body = await readBody(event)
-    const schema = z.object({
-      id: z.number(),
-      nama: z.string(),
-      bobot: z.number(),
-    })
-    const parsed = schema.safeParse(body)
-    if (!parsed.success) {
-      return sendError(event, createError({ statusCode: 400, statusMessage: 'Invalid input' }))
-    }
-    const [updated] = await db.update(master_penilaian_generik)
-      .set({ nama: parsed.data.nama, bobot: parsed.data.bobot.toString() })
-      .where(eq(master_penilaian_generik.id, parsed.data.id))
-      .returning()
-    return { data: updated }
-  }
+  // Ambil semua penilaian dengan kategori_id tsb
+  const data = await db.query.penilaian.findMany({
+    where: (p) => eq(p.kategori_id, kategori.id)
+  })
 
-  if (event.method === 'DELETE') {
-    const body = await readBody(event)
-    const schema = z.object({ id: z.number() })
-    const parsed = schema.safeParse(body)
-    if (!parsed.success) {
-      return sendError(event, createError({ statusCode: 400, statusMessage: 'Invalid input' }))
-    }
-    await db.delete(master_penilaian_generik).where(eq(master_penilaian_generik.id, parsed.data.id))
-    return { success: true }
-  }
-
-  return sendError(event, createError({ statusCode: 405, statusMessage: 'Method Not Allowed' }))
-})
+    return { kategori, data }
+  })

@@ -56,13 +56,13 @@ defineEmits<{
 }
 
 .ui-btn--secondary {
-  background: #e3f0fb;
+  background: #fff;
   color: #146190;
-  border-color: #8accef;
+  border-color: #d1d5db;
 }
 .ui-btn--secondary:hover:not(:disabled) {
-  background: #c1e3f6;
-  border-color: #4cb2e4;
+  background: #f3f4f6;
+  border-color: #a1a1aa;
 }
 
 .ui-btn--outline {

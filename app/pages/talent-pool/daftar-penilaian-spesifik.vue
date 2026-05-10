@@ -1,15 +1,53 @@
 
+
 <script setup lang="ts">
 import { ref } from 'vue'
 import { IconPlus, IconEdit, IconTrash } from '@tabler/icons-vue'
+import UITable from '~/components/UI/table.vue'
+
+const columns = [
+	{
+		title: 'No',
+		key: 'no',
+		width: 60,
+		align: 'center',
+		render: (_: any, row: any, idx: number) => idx + 1
+	},
+	{
+		title: 'Kode',
+		key: 'kode',
+		align: 'left',
+	},
+	{
+		title: 'Nama Penilaian',
+		key: 'nama_penilaian',
+		align: 'left',
+	},
+	{
+		title: 'Bobot',
+		key: 'bobot',
+		align: 'center',
+	},
+	{
+		title: 'Jenis Nilai',
+		key: 'jenis_nilai',
+		align: 'center',
+	},
+	{
+		title: 'Sumber Nilai',
+		key: 'sumber_nilai',
+		align: 'center',
+	},
+]
 
 
 type SpesifikItem = {
 	id: number
-	nama: string
+	kode: string
+	nama_penilaian: string
 	bobot: string
-	createdAt?: string
-	updatedAt?: string
+	jenis_nilai: string
+	sumber_nilai: string
 }
 const spesifikList = ref<SpesifikItem[]>([])
 
@@ -46,7 +84,7 @@ async function addSpesifik() {
 
 function startEdit(item: SpesifikItem) {
 	editId.value = item.id
-	editNama.value = item.nama
+	editNama.value = item.nama_penilaian
 	editBobot.value = Number(item.bobot)
 	showEditModal.value = true
 }
@@ -83,41 +121,44 @@ async function removeSpesifik(id: number) {
 <template>
 	<div class="p-6 max-w-2xl mx-auto">
 		<h1 class="text-xl font-bold mb-4">Daftar Penilaian Spesifik & Bobot</h1>
-		<div class="flex justify-end mb-2">
-			<button @click="showModal = true" class="px-4 py-2 rounded bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 flex items-center gap-2">
-			  <IconPlus class="w-4 h-4" />
-			  Tambah Penilaian
-			</button>
+
+		<div class="rounded-xl border border-slate-200 bg-white shadow-sm">
+			<table class="w-full table-fixed divide-y divide-slate-200 text-sm">
+				<thead class="bg-blue-900 text-white">
+					<tr>
+						<th class="px-3 py-3 text-center font-semibold w-12">No</th>
+						<th class="px-3 py-3 text-left font-semibold w-28">Kode</th>
+						<th class="px-3 py-3 text-left font-semibold w-44">Nama Penilaian</th>
+						<th class="px-3 py-3 text-center font-semibold w-20">Bobot</th>
+						<th class="px-3 py-3 text-center font-semibold w-32">Jenis Nilai</th>
+						<th class="px-3 py-3 text-center font-semibold w-32">Sumber Nilai</th>
+					</tr>
+				</thead>
+				<tbody class="text-slate-700">
+					<tr
+						v-for="(item, idx) in spesifikList"
+						:key="item.id"
+						:class="[
+							'transition',
+							idx % 2 === 0 ? 'bg-white' : 'bg-blue-50',
+							'hover:bg-slate-100'
+						]"
+					>
+						<td class="px-3 py-3 text-center">{{ idx + 1 }}</td>
+						<td class="px-3 py-3 font-medium">{{ item.kode }}</td>
+						<td class="px-3 py-3">{{ item.nama_penilaian }}</td>
+						<td class="px-3 py-3 text-center">{{ item.bobot }}</td>
+						<td class="px-3 py-3 text-center">{{ item.jenis_nilai }}</td>
+						<td class="px-3 py-3 text-center">{{ item.sumber_nilai }}</td>
+					</tr>
+					<tr v-if="spesifikList.length === 0">
+						<td colspan="6" class="text-center py-10 text-slate-400">
+							Belum ada data penilaian spesifik
+						</td>
+					</tr>
+				</tbody>
+			</table>
 		</div>
-		<table class="min-w-full divide-y divide-slate-200 text-sm mb-4">
-			<thead class="bg-slate-50 text-slate-600">
-				<tr>
-					<th class="px-4 py-3 text-center font-semibold w-12">No</th>
-					<th class="px-4 py-3 text-left font-semibold">Penilaian</th>
-					<th class="px-4 py-3 text-center font-semibold">Bobot (%)</th>
-					<th class="px-4 py-3 text-center font-semibold">Aksi</th>
-				</tr>
-			</thead>
-			<tbody class="divide-y divide-slate-100 bg-white text-slate-700">
-				<tr v-for="(item, idx) in spesifikList" :key="item.id">
-					<td class="px-4 py-3 text-center">{{ idx + 1 }}</td>
-					<td class="px-4 py-3">{{ item.nama }}</td>
-					<td class="px-4 py-3 text-center">{{ item.bobot }}</td>
-					<td class="px-4 py-3 text-center">
-						<div class="inline-flex gap-2">
-							<button @click="startEdit(item)" class="px-2 py-1 text-xs rounded bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 flex items-center gap-1">
-							  <IconEdit class="w-4 h-4" />
-							  Edit
-							</button>
-							<button @click="removeSpesifik(item.id)" class="px-2 py-1 text-xs rounded bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 flex items-center gap-1">
-							  <IconTrash class="w-4 h-4" />
-							  Hapus
-							</button>
-						</div>
-					</td>
-				</tr>
-			</tbody>
-		</table>
 
 		<!-- Modal Edit Penilaian -->
 		<div v-if="showEditModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
@@ -141,26 +182,6 @@ async function removeSpesifik(id: number) {
 			</div>
 		</div>
 
-		<!-- Modal Tambah Penilaian -->
-		<div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-			<div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm relative">
-				<button @click="showModal = false" class="absolute top-2 right-2 text-slate-400 hover:text-slate-600">&times;</button>
-				<h2 class="text-lg font-bold mb-4">Tambah Penilaian Spesifik</h2>
-				<form @submit.prevent="addSpesifik" class="space-y-4">
-					<div>
-						<label class="block text-sm font-medium mb-1">Nama Penilaian</label>
-						<input v-model="newNama" placeholder="Nama penilaian" class="border rounded px-2 py-1 text-sm w-full" required />
-					</div>
-					<div>
-						<label class="block text-sm font-medium mb-1">Bobot (%)</label>
-						<input v-model.number="newBobot" type="number" min="0" max="100" placeholder="Bobot (%)" class="border rounded px-2 py-1 text-sm w-full text-center" required />
-					</div>
-					<div class="flex justify-end gap-2">
-						<button type="button" @click="showModal = false" class="px-3 py-1 rounded bg-slate-100 text-slate-700 text-xs font-semibold hover:bg-slate-200">Batal</button>
-						<button type="submit" class="px-3 py-1 rounded bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700">Tambah</button>
-					</div>
-				</form>
-			</div>
-		</div>
+		<!-- Modal tambah penilaian dihapus -->
 	</div>
 </template>

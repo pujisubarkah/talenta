@@ -1,5 +1,7 @@
+
 import { drizzle } from 'drizzle-orm/node-postgres'
 import { Pool } from 'pg'
+import * as schema from './schema'
 
 const connectionString = process.env.DATABASE_URL
 
@@ -42,8 +44,8 @@ pool.on('connect', async (client) => {
   await client.query('SET search_path TO sijawara, siap')
 })
 
-// Instance drizzle ORM
-export const db = drizzle(pool)
+// Instance drizzle ORM dengan schema agar db.query.* tersedia
+export const db = drizzle(pool, { schema })
 
 // Contoh: import { db } from '@/server/database' lalu gunakan db.select(...)
 // Jangan jalankan koneksi di top-level, biarkan pool dan db digunakan di handler/server

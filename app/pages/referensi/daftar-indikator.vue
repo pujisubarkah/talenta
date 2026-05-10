@@ -19,12 +19,10 @@
       </div>
 
       <!-- Button Tambah -->
-      <UIButton color="primary" @click="openAddModal">
-        <UIIcon color="white" class="mr-2">
-          <IconPlus />
-        </UIIcon>
+      <Button variant="primary" @click="openAddModal">
+        <IconPlus :size="18" stroke-width="2" />
         Tambah Indikator
-      </UIButton>
+      </Button>
     </div>
 
     <!-- TABLE WRAPPER -->
@@ -73,14 +71,14 @@
             <!-- AKSI -->
             <td class="px-3 py-3 text-center">
               <div class="flex justify-center gap-2">
-                <UIButton color="secondary" size="sm" @click="startEdit(item)">
-                  <UIIcon color="primary" size="sm"><IconEdit /></UIIcon>
+                <Button variant="secondary" size="sm" @click="startEdit(item)">
+                  <IconEdit :size="16" stroke-width="2" />
                   Edit
-                </UIButton>
-                <UIButton color="danger" size="sm" @click="removePenilaian(item.id)">
-                  <UIIcon color="danger" size="sm"><IconTrash /></UIIcon>
+                </Button>
+                <Button variant="danger" size="sm" @click="confirmRemovePenilaian(item.id)">
+                  <IconTrash :size="16" stroke-width="2" />
                   Hapus
-                </UIButton>
+                </Button>
               </div>
             </td>
           </tr>
@@ -91,8 +89,7 @@
           </tr>
         </tbody>
       </table>
-    </div>
-
+  </div>
     <!-- PAGINATION -->
     <div v-if="filteredPenilaianList.length > pageSize" class="flex justify-center mt-4">
       <button class="px-3 py-1 mx-1 rounded border text-sm" :class="{ 'bg-blue-600 text-white border-blue-600': page === 1 }" :disabled="page === 1" @click="page--">&laquo;</button>
@@ -233,14 +230,42 @@
         </form>
       </div>
     </div>
+
+    <!-- Modal Konfirmasi Hapus -->
+    <div v-if="showDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+      <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-sm relative border border-slate-100 text-center">
+        <h2 class="text-xl font-bold mb-3 text-slate-800">Konfirmasi Hapus</h2>
+        <p class="text-slate-600 mb-6 text-sm">Apakah Anda yakin ingin menghapus indikator ini? Data yang dihapus tidak dapat dikembalikan.</p>
+        <div class="flex justify-center gap-3">
+          <button
+            @click="showDeleteModal = false"
+            class="px-5 py-2 rounded-lg bg-slate-100 text-slate-700 text-sm font-semibold hover:bg-slate-200 transition"
+          >
+            Batal
+          </button>
+          <button
+            @click="executeDelete"
+            class="px-5 py-2 rounded-lg bg-red-600 text-white text-sm font-semibold hover:bg-red-700 transition"
+          >
+            Hapus
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div v-if="toast.show" class="fixed top-5 right-5 z-50 transition-opacity duration-300">
+      <div :class="['px-5 py-3 rounded-lg shadow-lg text-white text-sm font-semibold flex items-center gap-2', toast.type === 'success' ? 'bg-green-600' : 'bg-red-600']">
+        <span>{{ toast.message }}</span>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import { IconPlus, IconEdit, IconTrash } from '@tabler/icons-vue'
-import UIButton from '~/components/UI/UIButton.vue'
-import UIIcon from '~/components/UI/UIIcon.vue'
+import Button from '~/components/UI/button.vue'
 
 type Kategori = {
   id: number
@@ -250,10 +275,11 @@ type Kategori = {
 
 type Penilaian = {
   id: number
-  kategori_id: number
   kode: string
+  kategori_id: number
   nama_penilaian: string
   deskripsi: string
+  nama_ipsi: string
   bobot: string
   jenis_nilai: string
   metode_penilaian: string
@@ -295,6 +321,22 @@ const defaultForm = {
   urutan: 1,
   is_wajib: false,
   is_active: true
+}
+
+const showDeleteModal = ref(false)
+const deleteId = ref<number | null>(null)
+const toast = ref({ show: false, message: '', type: 'success' })
+
+function showToast(message: string, type: 'success' | 'error' = 'success') {
+  toast.value = { show: true, message, type }
+  setTimeout(() => {
+    toast.value.show = false
+  }, 3000)
+}
+
+function confirmRemovePenilaian(id: number) {
+  deleteId.value = id
+  showDeleteModal.value = true
 }
 
 const kategoriOptions = computed(() =>
@@ -356,8 +398,11 @@ async function addPenilaian() {
   })
 
   if (res.ok) {
+    showToast('Indikator berhasil ditambahkan')
     await fetchPenilaian()
     closeAddModal()
+  } else {
+    showToast('Gagal menambahkan indikator', 'error')
   }
 }
 
@@ -383,22 +428,36 @@ async function saveEdit() {
   })
 
   if (res.ok) {
+    showToast('Indikator berhasil diperbarui')
     await fetchPenilaian()
     cancelEdit()
+  } else {
+    showToast('Gagal memperbarui indikator', 'error')
   }
 }
 
-async function removePenilaian(id: number) {
-  await fetch(`/api/master/penilaian/${id}`, {
+async function executeDelete() {
+  if (!deleteId.value) return
+
+  const res = await fetch(`/api/master/penilaian/${deleteId.value}`, {
     method: 'DELETE'
   })
-  await fetchPenilaian()
+  
+  if (res.ok) {
+    showToast('Indikator berhasil dihapus')
+    await fetchPenilaian()
+  } else {
+    showToast('Gagal menghapus indikator', 'error')
+  }
+
+  showDeleteModal.value = false
+  deleteId.value = null
 }
 
 onMounted(() => {
   Promise.all([
-    fetchPenilaian(),
-    fetchKategori()
+    fetchKategori(),
+    fetchPenilaian()
   ])
 })
 
