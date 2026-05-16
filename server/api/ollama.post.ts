@@ -14,6 +14,7 @@ export default defineEventHandler(async (event) => {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model,
+      stream: false,
       messages: [
         { role: 'user', content: message }
       ]
