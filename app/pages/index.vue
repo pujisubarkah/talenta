@@ -60,8 +60,8 @@ const handleLogin = async () => {
 
       <!-- Logo & Brand -->
       <div class="flex flex-col items-center mb-8">
-        <div class="w-16 h-16 rounded-2xl bg-linear-to-br from-[#3781c7] to-[#1a4f8a] flex items-center justify-center shadow-lg mb-4">
-          <img src="/lanri.png" alt="Logo LANRI" class="w-10 h-10 object-contain" />
+        <div class="mb-1">
+          <img src="/lanri.png" alt="Logo LANRI" class="w-32 h-32 object-contain" />
         </div>
         <h1 class="text-3xl font-extrabold text-slate-800 tracking-tight">STAS</h1>
         <p class="text-sm text-slate-500 text-center mt-1 leading-snug">

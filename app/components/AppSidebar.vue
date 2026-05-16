@@ -119,8 +119,10 @@ const toggleMenu = (label: string) => {
   ]">
     <!-- Brand -->
     <div class="h-16 flex items-center px-6 border-b border-blue-700 shrink-0">
-      <div class="w-8 h-8 rounded-lg bg-linear-to-br from-blue-700 to-blue-900 flex items-center justify-center shadow mr-3">
-        <img src="/lanri.png" alt="STAS" class="w-5 h-5 object-contain" />
+      <div class="mr-3 flex items-center justify-center">
+        <span class="inline-flex items-center justify-center w-12 h-12 bg-white rounded-full ring-2 ring-white">
+          <img src="/lanri.png" alt="STAS" class="w-10 h-10 object-contain" />
+        </span>
       </div>
       <span v-if="!props.mini" class="font-extrabold text-white tracking-tight text-lg">STAS</span>
     </div>

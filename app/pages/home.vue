@@ -12,6 +12,7 @@ const tabs = [
   { id: 7, label: 'Kotak 7' },
   { id: 8, label: 'Kotak 8' },
   { id: 9, label: 'Kotak 9' },
+  { id: 10, label: 'Talenta AI' },
 ]
 
 const activeTab = ref(0)
@@ -57,6 +58,11 @@ const getTabLabel = (id: number) => {
       <div class="bg-white rounded-2xl rounded-tl-none border border-slate-200 shadow-md relative z-10 min-h-100">
         <div v-if="activeTab === 0" class="p-6">
           <TalentMatrix @select-box="activeTab = $event" />
+        </div>
+        <div v-else-if="activeTab === 10" class="p-6 min-h-100 flex flex-col items-center justify-center text-center">
+          <h2 class="text-2xl font-bold text-[#3781c7] mb-2">Talenta AI</h2>
+          <p class="text-slate-600 mb-4">Chat dengan Talenta AI untuk bantuan dan pertanyaan seputar talenta.</p>
+          <TalentaAIChat />
         </div>
         <div v-else class="min-h-100">
           <TalentListTable :key="activeTab" :tab-id="activeTab" :tab-label="getTabLabel(activeTab)" />

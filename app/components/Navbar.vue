@@ -49,8 +49,8 @@ if (typeof window !== 'undefined') {
   <nav class="w-full h-14 bg-white border-b border-slate-200 shadow-sm flex items-center px-6 gap-6 z-50">
     <!-- Brand -->
     <div class="flex items-center gap-2 shrink-0 mr-4">
-      <div class="w-7 h-7 rounded-lg bg-linear-to-br from-[#3781c7] to-[#1a4f8a] flex items-center justify-center shadow">
-        <img src="/lanri.png" alt="STAS" class="w-4 h-4 object-contain" />
+      <div class="w-7 h-7 flex items-center justify-center">
+        <img src="/lanri.png" alt="STAS" class="w-7 h-7 object-contain" />
       </div>
       <span class="font-extrabold text-slate-800 tracking-tight text-base">STAS</span>
     </div>
